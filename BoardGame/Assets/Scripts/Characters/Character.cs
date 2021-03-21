@@ -77,6 +77,11 @@ public class Character : MonoBehaviour
         if (isMoving)
         {
             Move();
+            arrows.HideArrows();
+        }
+        else
+        {
+            arrows.ShowArrows(currentTile);
         }
     }
 
@@ -85,11 +90,13 @@ public class Character : MonoBehaviour
         Vector3 currentPosition = transform.position;
 
         currentPosition.x = Mathf.MoveTowards(currentPosition.x, currentTile.transform.position.x, moveSpeed * Time.deltaTime);
-        currentPosition.y = Mathf.MoveTowards(currentPosition.y, currentTile.transform.position.y, moveSpeed * Time.deltaTime);
+        currentPosition.z = Mathf.MoveTowards(currentPosition.z, currentTile.transform.position.z, moveSpeed * Time.deltaTime);
 
         Vector3 offset = currentTile.transform.position - transform.position;
 
-        if (offset.sqrMagnitude > 0.001f)
+        transform.position = currentPosition;
+
+        if (offset.sqrMagnitude < 0.001f)
         {
             transform.position = currentTile.transform.position;
         }
