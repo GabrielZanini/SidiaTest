@@ -13,7 +13,7 @@ public class CharactersManager : MonoBehaviour
     int numberCharacters = 2;
 
     [SerializeField]
-    Character characterTurn;
+    Character turnCharacter;
     [SerializeField]
     Board board;
 
@@ -69,7 +69,7 @@ public class CharactersManager : MonoBehaviour
 
     public void AddHealth()
     {
-        characterTurn.AddHealth(20);
+        turnCharacter.AddHealth(20);
     }
 
 
