@@ -11,16 +11,20 @@ public class Board : MonoBehaviour
     [SerializeField]
     Sprite squareTile;
 
-    [SerializeField] [Range(4, 16)]
+    [SerializeField]
+    [Range(4, 16)]
     int size = 16;
 
-    [ReorderableList] [SerializeField]
+    [ReorderableList]
+    [SerializeField]
     List<Color> tileColors;
 
     [SerializeField] [ReadOnly]
     List<Tile> board;
 
-    int totalTiles = 0;
+    [ReorderableList]
+    [SerializeField]
+    List<Tile> spawnPoints;
 
     int nextColorId = -1;
 
@@ -56,8 +60,6 @@ public class Board : MonoBehaviour
 
     void CreateSquareBoard()
     {
-        totalTiles = size * size;
-
         for (int i = 0; i < size; i++)
         {
             for (int j = 0; j < size; j++)
@@ -87,12 +89,16 @@ public class Board : MonoBehaviour
             }
             GetNextColor();
         }
+
+        spawnPoints.Add(board[0]);
+        spawnPoints.Add(board[board.Count-1]);
     }
 
     [Button]
     void ClearBoardTiles()
     {
         nextColorId = -1;
+        spawnPoints.Clear();
 
         while (board.Count > 0)
         {
