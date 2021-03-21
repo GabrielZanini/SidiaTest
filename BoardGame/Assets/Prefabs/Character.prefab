@@ -829,18 +829,27 @@ MonoBehaviour:
   type: 0
   color: {r: 1, g: 1, b: 1, a: 1}
   settings: {fileID: 11400000, guid: d053ba473fff7b84fb5e9200cff4e4d1, type: 2}
-  onMove:
-    m_PersistentCalls:
-      m_Calls: []
   currentTile: {fileID: 0}
   moveSpeed: 5
   health: 100
+  attack: 20
   state: 0
   isTurn: 0
+  canAttack: 0
+  hasMoved: 0
   enemy: {fileID: 0}
   head: {fileID: 3651221768711227560}
   hat: {fileID: 3651221768705982692}
   body: {fileID: 3651221769659061206}
+  onMove:
+    m_PersistentCalls:
+      m_Calls: []
+  onAttack:
+    m_PersistentCalls:
+      m_Calls: []
+  onDeath:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3651221769799285627
 GameObject:
   m_ObjectHideFlags: 0

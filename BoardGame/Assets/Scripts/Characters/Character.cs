@@ -15,25 +15,31 @@ public class Character : MonoBehaviour
 
     [SerializeField]
     [Expandable]
-    CharacterSettings settings;
+    CharacterSettings settings;    
     
-    
-    public UnityEvent onMove;
-
     public Tile currentTile;
-    [SerializeField] float moveSpeed;
+    [SerializeField]
+    float moveSpeed;
 
     [SerializeField]
     [ReadOnly]
     int health = 0;
+    [SerializeField]
     [ReadOnly]
+    int attack = 0;
+
     [Header("Turn")]
+    [SerializeField]
+    [ReadOnly]
     public CharacterSate state = CharacterSate.Waiting;
     [ReadOnly]
     public bool isTurn = false;
-    [SerializeField]
     [ReadOnly]
-    Character enemy;
+    public bool canAttack = false;
+    [ReadOnly]
+    [SerializeField] bool hasMoved = false;
+    [ReadOnly]
+    public Character enemy;
 
     [Header("Sprites")]
     [SerializeField]
@@ -43,9 +49,20 @@ public class Character : MonoBehaviour
     [SerializeField]
     SpriteRenderer body;
 
+    [Foldout("Events")]
+    public UnityEvent onMove;
+    [Foldout("Events")]
+    public UnityEvent onAttack;
+    [Foldout("Events")]
+    public UnityEvent onDeath;
 
     Arrows arrows;
     CharactersManager manager;
+
+
+    public int Attack { get { return settings.Attack; } }
+    public bool IsDead { get { return health <= 0; } }
+
 
     private void Reset()
     {
@@ -80,19 +97,11 @@ public class Character : MonoBehaviour
             {
                 Move();
                 arrows.HideArrows();
-                
+                hasMoved = true;
+
                 if (currentTile.transform.position == transform.position)
                 {
-                    enemy = EnemyNear();
-
-                    if (enemy != null && false)
-                    {
-                        state = CharacterSate.Fighting;
-                    }
-                    else
-                    {
-                        state = CharacterSate.Waiting;
-                    }
+                    WaitIfNotAttack();
                 }
             }
             else if (state == CharacterSate.Waiting)
@@ -101,10 +110,12 @@ public class Character : MonoBehaviour
                 {
                     arrows.ShowArrows(currentTile);
                 }
+
+                WaitIfNotAttack();
             }
             else if (state == CharacterSate.Fighting)
             {
-                
+                arrows.HideArrows();
             }
         }
         else
@@ -112,6 +123,29 @@ public class Character : MonoBehaviour
             transform.position = currentTile.transform.position;
             state = CharacterSate.Waiting;
             arrows.HideArrows();
+            enemy = null;
+            attack = settings.Attack;
+            hasMoved = false;
+        }
+    }
+
+    void WaitIfNotAttack()
+    {
+        state = CharacterSate.Waiting;
+
+        if (canAttack && hasMoved)
+        {
+            enemy = EnemyNear();
+
+            if (enemy != null)
+            {
+                state = CharacterSate.Fighting;
+                canAttack = false;
+                onAttack.Invoke();
+            }
+        }
+        else
+        {
             enemy = null;
         }
     }
@@ -131,6 +165,11 @@ public class Character : MonoBehaviour
         {
             transform.position = currentTile.transform.position;
         }
+    }
+
+    void CanAttack()
+    {
+        
     }
 
     Character EnemyNear()
@@ -169,12 +208,34 @@ public class Character : MonoBehaviour
     public void AddHealth(int hp)
     {
         health += hp;
+
         if (health > settings.MaxHealth)
         {
             health = settings.MaxHealth;
         }
+        else if (health <= 0)
+        {
+            onDeath.Invoke();
+        }
+
+        //Debug.Log(gameObject.name + " HP = " + health + "/" + settings.MaxHealth);
     }
 
+    public void TakeDamege(int damage)
+    {
+        AddHealth(-damage);
+    }
+
+
+    public void AddAttack(int atk)
+    {
+        attack += atk;
+
+        if (attack < 0)
+        {
+            attack = 0;
+        }
+    }
 
     public void SetColor(Color newColor)
     {
@@ -197,11 +258,13 @@ public class Character : MonoBehaviour
         if (settings != null)
         {
             health = settings.MaxHealth;
+            attack = settings.Attack;
             body.sprite = settings.sprite;
         }
         else
         {
             health = 0;
+            attack = 0;
             body.sprite = null;
         }
     }
