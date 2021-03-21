@@ -16,22 +16,25 @@ public class Arrows : MonoBehaviour
 
         for (int i=0; i<tile.Neighbors.Count; i++)
         {
-            if (tile.Neighbors[i].direction == DirectionType.Up)
+            if (tile.Neighbors[i].tile.content != TileContentType.Character)
             {
-                Up.Visible = true;
-            }
-            else if (tile.Neighbors[i].direction == DirectionType.Down)
-            {
-                Down.Visible = true;
-            }
-            else if (tile.Neighbors[i].direction == DirectionType.Left)
-            {
-                Left.Visible = true;
-            }
-            else if (tile.Neighbors[i].direction == DirectionType.Right)
-            {
-                Right.Visible = true;
-            }
+                if (tile.Neighbors[i].direction == DirectionType.Up)
+                {
+                    Up.Visible = true;
+                }
+                else if (tile.Neighbors[i].direction == DirectionType.Down)
+                {
+                    Down.Visible = true;
+                }
+                else if (tile.Neighbors[i].direction == DirectionType.Left)
+                {
+                    Left.Visible = true;
+                }
+                else if (tile.Neighbors[i].direction == DirectionType.Right)
+                {
+                    Right.Visible = true;
+                }
+            }            
         }
     }
 

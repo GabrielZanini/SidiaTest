@@ -2,41 +2,60 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
+using UnityEngine.UI;
 
 public class CharactersManager : MonoBehaviour
 {
-    [SerializeField]
-    GameObject characterPrefab;
+    [SerializeField] GameObject characterPrefab;    
     [SerializeField] Transform holder;
  
-    [SerializeField]
+    
     [ReadOnly]
-    List<Character> characters;
-
-    [SerializeField]
-    [ReadOnly]
-    int turnCharacter = 0;
+    public List<Character> characters;
 
 
-
-
-    public void SpawnCharacters(List<CharacterType> types, List<Tile> spawnPoints)
+    public void SpawnCharacters(List<CharacterData> data, List<Tile> spawnPoints)
     {
         ClearCharacters();
 
-        for (int i = 0; i < Mathf.Min(types.Count, spawnPoints.Count); i++)
+        for (int i = 0; i < Mathf.Min(data.Count, spawnPoints.Count); i++)
         {
             GameObject obj = Instantiate(characterPrefab, spawnPoints[i].transform.position, Quaternion.identity, holder);
-            obj.name = obj.name + " " + i;
             Character character = obj.GetComponent<Character>();
-            character.type = types[i];
-            character.currentTile = spawnPoints[i];
+            SetCharacter(i, character, data[i], spawnPoints[i]);
             characters.Add(character);
         }
     }
 
+    void SetCharacter(int index, Character character, CharacterData data, Tile spawnPoint)
+    {
+        character.gameObject.name = "Character " + index; 
+        character.type = data.type;
+        character.SetColor(data.bodyColor);
+        character.SetHat(data.hat);
+        character.SetSettings(data.settings);
+        character.currentTile = spawnPoint;
+        spawnPoint.content = TileContentType.Character;
+
+        Text label = character.GetComponentInChildren<Text>();
+        label.color = data.labelColor;
+        label.text = (index + 1).ToString();
+        
+        if (character.type == CharacterType.Player) 
+        {
+            character.gameObject.name += " Player";
+            label.text += "P";
+
+        }
+        else if (character.type == CharacterType.IA)
+        {
+            character.gameObject.name += " IA";
+            label.text = "CPU";
+        }        
+    }
+
     [Button]
-    void ClearCharacters()
+    public void ClearCharacters()
     {
         for (int i=0; i < characters.Count; i++)
         {

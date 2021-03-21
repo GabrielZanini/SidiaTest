@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
+using UnityEngine.Events;
 
 public class Character : MonoBehaviour
 {
@@ -14,7 +15,9 @@ public class Character : MonoBehaviour
     [SerializeField]
     [Expandable]
     CharacterSettings settings;
-
+    
+    
+    public UnityEvent onMove;
 
     public Tile currentTile;
     [SerializeField] float moveSpeed;
@@ -23,7 +26,13 @@ public class Character : MonoBehaviour
     [ReadOnly]
     int health = 0;
     [ReadOnly]
-    public bool isMoving = false;
+    [Header("Turn")]
+    public CharacterSate state = CharacterSate.Waiting;
+    [ReadOnly]
+    public bool isTurn = false;
+    [SerializeField]
+    [ReadOnly]
+    Character enemy;
 
     [Header("Sprites")]
     [SerializeField]
@@ -39,21 +48,11 @@ public class Character : MonoBehaviour
 
     private void Reset()
     {
-        if (settings != null)
-        {
-            health = settings.MaxHealth;
-            body.sprite = settings.sprite;
-        }
-        else
-        {
-            health = 0;
-            body.sprite = null;
-        }
-
-        SetColor(color);
-
         arrows = GetComponentInChildren<Arrows>();
         manager = GetComponentInParent<CharactersManager>();
+
+        SetSettings(settings);
+        SetColor(color);
     }
 
     private void OnValidate()
@@ -71,18 +70,48 @@ public class Character : MonoBehaviour
         
     }
 
+    [Button]
     void Update()
     {
-        isMoving = currentTile.transform.position != transform.position;
-
-        if (isMoving)
+        if (isTurn)
         {
-            Move();
-            arrows.HideArrows();
+            if (state == CharacterSate.Moving)
+            {
+                Move();
+                arrows.HideArrows();
+                
+                if (currentTile.transform.position == transform.position)
+                {
+                    enemy = EnemyNear();
+
+                    if (enemy != null && false)
+                    {
+                        state = CharacterSate.Fighting;
+                    }
+                    else
+                    {
+                        state = CharacterSate.Waiting;
+                    }
+                }
+            }
+            else if (state == CharacterSate.Waiting)
+            {
+                if (type == CharacterType.Player)
+                {
+                    arrows.ShowArrows(currentTile);
+                }
+            }
+            else if (state == CharacterSate.Fighting)
+            {
+                
+            }
         }
         else
         {
-            arrows.ShowArrows(currentTile);
+            transform.position = currentTile.transform.position;
+            state = CharacterSate.Waiting;
+            arrows.HideArrows();
+            enemy = null;
         }
     }
 
@@ -103,16 +132,37 @@ public class Character : MonoBehaviour
         }
     }
 
+    Character EnemyNear()
+    {
+        for (int i = 0; i < currentTile.Neighbors.Count; i++)
+        {
+            if (currentTile.Neighbors[i].tile.content == TileContentType.Character)
+            {
+                return currentTile.Neighbors[i].tile.character;
+            }
+        }
+
+        return null;
+    }
+
+
     public void MoveTo(DirectionType direction)
     {        
         for (int i=0; i<currentTile.Neighbors.Count; i++)
         {
             if (currentTile.Neighbors[i].direction == direction)
             {
+                currentTile.content = TileContentType.Empty;
+                currentTile.character = null;
                 currentTile = currentTile.Neighbors[i].tile;
+                currentTile.content = TileContentType.Character;
+                currentTile.character = this;
+                state = CharacterSate.Moving;
+                onMove.Invoke();
                 break;
             }
         }
+
     }
 
     public void AddHealth(int hp)
@@ -132,5 +182,26 @@ public class Character : MonoBehaviour
         head.color = color;
         hat.color = color;
         body.color = color;
+    }
+
+    public void SetHat(Sprite sprite)
+    {
+        hat.sprite = sprite;
+    }
+
+    public void SetSettings(CharacterSettings settings)
+    {
+        this.settings = settings;
+
+        if (settings != null)
+        {
+            health = settings.MaxHealth;
+            body.sprite = settings.sprite;
+        }
+        else
+        {
+            health = 0;
+            body.sprite = null;
+        }
     }
 }

@@ -90,7 +90,7 @@ public class BoardManager : MonoBehaviour
     }
 
     [Button]
-    void ClearBoardTiles()
+    public void ClearBoardTiles()
     {
         nextColorId = -1;
         spawnPoints.Clear();

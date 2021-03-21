@@ -15,6 +15,13 @@ public enum CharacterType
     IA
 }
 
+public enum CharacterSate
+{
+    Waiting,
+    Moving,
+    Fighting,
+}
+
 public enum TurnActions
 {
     Move,
@@ -35,4 +42,12 @@ public enum PickUpType
     Attack,
     Health,
     Dice
+}
+
+
+public enum TileContentType
+{
+    Empty,
+    Collectable,
+    Character,
 }

@@ -16,6 +16,7 @@ public class CameraManager : MonoBehaviour
 
     Camera cam;
 
+
     private void OnValidate()
     {
         cam = holder.GetComponentInChildren<Camera>();

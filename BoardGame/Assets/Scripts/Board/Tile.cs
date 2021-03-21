@@ -6,10 +6,18 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
+    [ReadOnly]
+    [Space]
+    public SpriteRenderer spriteRenderer;
+    [ReadOnly]
+    [Space]
+    public TileContentType content = TileContentType.Empty;
+    [ReadOnly]
+    public Character character;
+
     [SerializeField]
     public List<Neighbor> Neighbors;
-    [ReadOnly][Space]
-    public SpriteRenderer spriteRenderer;
+
 
     public int X { get { return Mathf.RoundToInt(transform.position.x); } }
     public int Y { get { return Mathf.RoundToInt(transform.position.y); } }
