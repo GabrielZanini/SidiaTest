@@ -39,7 +39,7 @@ public class Board : MonoBehaviour
 
     void Start()
     {
-        CreateBoard();
+        //CreateBoard();
     }
 
     void Update()
@@ -56,7 +56,6 @@ public class Board : MonoBehaviour
 
     void CreateSquareBoard()
     {
-        //Debug.Log("CreateBoard");
         totalTiles = size * size;
 
         for (int i = 0; i < size; i++)
@@ -64,13 +63,26 @@ public class Board : MonoBehaviour
             for (int j = 0; j < size; j++)
             {
                 GameObject obj = Instantiate(tilePrefab, new Vector3(j, 0, i), Quaternion.Euler(90, 0, 0), transform);
+                obj.name = "Tile " + j + "x" + i;
                 Tile tile = obj.GetComponent<Tile>();
 
                 tile.spriteRenderer.sprite = squareTile;
                 tile.spriteRenderer.color = GetNextColor();
 
-                tile.Neighbors = GetNeighbors();
+                // Vertical Neighbors
+                if (i > 0)
+                {
+                    tile.Neighbors.Add(new Neighbor(DirectionType.Down, board[(i - 1) * size + j]));
+                    board[(i - 1) * size + j].Neighbors.Add(new Neighbor(DirectionType.Up, tile));
+                }
 
+                // Horizontal Neighbors
+                if (j > 0)
+                {
+                    tile.Neighbors.Add(new Neighbor(DirectionType.Left, board[i * size + j - 1]));
+                    board[i * size + j - 1].Neighbors.Add(new Neighbor(DirectionType.Right, tile));
+                }
+                                                
                 board.Add(tile);
             }
             GetNextColor();
@@ -113,11 +125,6 @@ public class Board : MonoBehaviour
     }
 
 
-    List<Tile> GetNeighbors()
-    {
-        Debug.Log("-------------- Visinhos ------------");
-        return null;
-    }
 
 }
 
