@@ -825,6 +825,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9f529046a155554b8c4a3daed523b6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isLocked: 0
   type: 0
   color: {r: 1, g: 1, b: 1, a: 1}
   settings: {fileID: 11400000, guid: d053ba473fff7b84fb5e9200cff4e4d1, type: 2}
@@ -836,6 +837,7 @@ MonoBehaviour:
   health: 100
   state: 0
   isTurn: 0
+  enemy: {fileID: 0}
   head: {fileID: 3651221768711227560}
   hat: {fileID: 3651221768705982692}
   body: {fileID: 3651221769659061206}

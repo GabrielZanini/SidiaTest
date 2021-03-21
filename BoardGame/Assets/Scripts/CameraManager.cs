@@ -1,31 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using NaughtyAttributes;
 
 public class CameraManager : MonoBehaviour
 {
-    [SerializeField] Transform target;
+    [Header("Settings")]
     [SerializeField] Transform holder;
-
-    [SerializeField] Vector3 lookOffset = Vector3.zero;
     [SerializeField] Vector3 positionOffset = Vector3.zero;
-    
-    [Range(0f, 1f)]
+    [Range(0f, 10f)]
     [SerializeField] 
     float smoothPosition = 1f;
 
     Camera cam;
 
+    [ShowNativeProperty]
+    public Transform Target { get; set; }
+
+
 
     private void OnValidate()
     {
+        if (Target == null)
+        {
+            Target = transform;
+        }
+
         cam = holder.GetComponentInChildren<Camera>();
         
         cam.transform.localPosition = positionOffset;
-        if (!Application.isPlaying)
-        {
-            cam.transform.LookAt(target.position + positionOffset);
-        }
+        
     }
 
     void Update()
@@ -35,10 +39,13 @@ public class CameraManager : MonoBehaviour
 
     void Follow()
     {
-        if (target != null)
+        if (Target != null)
         {
-            holder.transform.position = Vector3.Lerp(holder.transform.position, target.position, smoothPosition);
+            holder.transform.position = Vector3.Lerp(holder.transform.position, Target.position, smoothPosition * Time.deltaTime);
         }
     }
+
+
+    
 
 }

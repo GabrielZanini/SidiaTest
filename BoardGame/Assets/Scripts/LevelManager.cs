@@ -88,6 +88,7 @@ public class LevelManager : MonoBehaviour
         charactersManager.ClearCharacters();
     }
 
+    [Button]
     void EndTurn()
     {
         ResetTurn();
@@ -114,6 +115,8 @@ public class LevelManager : MonoBehaviour
         turnCharacter = character;
         turnCharacter.isTurn = true;
         turnCharacter.onMove.AddListener(RemoveTurnMove);
+
+        cameraManager.Target = turnCharacter.transform;
     }
 
     Character NextCharacter()

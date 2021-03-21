@@ -72,4 +72,17 @@ public class CharactersManager : MonoBehaviour
         characters.Clear();
     }
 
+    public void LockCharacters()
+    {
+        for (int i = 0; i < characters.Count; i++)
+        {
+            characters[i].isLocked = false;
+        }
+    }
+
+    public void UnlockCharacters()
+    {
+        
+    }
+
 }

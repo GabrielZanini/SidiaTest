@@ -7,6 +7,7 @@ using UnityEngine.Events;
 public class Character : MonoBehaviour
 {
     [Header("Settings")]
+    public bool isLocked = false;
     public CharacterType type = CharacterType.Player;
 
     [SerializeField]
@@ -73,7 +74,7 @@ public class Character : MonoBehaviour
     [Button]
     void Update()
     {
-        if (isTurn)
+        if (isTurn && !isLocked)
         {
             if (state == CharacterSate.Moving)
             {
@@ -138,7 +139,7 @@ public class Character : MonoBehaviour
         {
             if (currentTile.Neighbors[i].tile.content == TileContentType.Character)
             {
-                return currentTile.Neighbors[i].tile.character;
+                return currentTile.Neighbors[i].tile.Character;
             }
         }
 
@@ -153,10 +154,10 @@ public class Character : MonoBehaviour
             if (currentTile.Neighbors[i].direction == direction)
             {
                 currentTile.content = TileContentType.Empty;
-                currentTile.character = null;
+                currentTile.Character = null;
                 currentTile = currentTile.Neighbors[i].tile;
                 currentTile.content = TileContentType.Character;
-                currentTile.character = this;
+                currentTile.Character = this;
                 state = CharacterSate.Moving;
                 onMove.Invoke();
                 break;
