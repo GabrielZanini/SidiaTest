@@ -5,8 +5,8 @@ using NaughtyAttributes;
 
 public class Character : MonoBehaviour
 {
-    [SerializeField]
-    CharacterType type = CharacterType.Player;
+    [Header("Settings")]
+    public CharacterType type = CharacterType.Player;
 
     [SerializeField]
     Color color = Color.white;
@@ -15,8 +15,15 @@ public class Character : MonoBehaviour
     [Expandable]
     CharacterSettings settings;
 
+
+    public Tile currentTile;
+    [SerializeField] float moveSpeed;
+
     [SerializeField]
+    [ReadOnly]
     int health = 0;
+    [ReadOnly]
+    public bool isMoving = false;
 
     [Header("Sprites")]
     [SerializeField]
@@ -26,10 +33,6 @@ public class Character : MonoBehaviour
     [SerializeField]
     SpriteRenderer body;
 
-    [SerializeField] Tile currentTile;
-    [SerializeField] float moveSpeed;
-
-    public bool isMoving = false;
 
     Arrows arrows;
     CharactersManager manager;
@@ -47,9 +50,7 @@ public class Character : MonoBehaviour
             body.sprite = null;
         }
 
-        head.color = color;
-        hat.color = color;
-        body.color = color;
+        SetColor(color);
 
         arrows = GetComponentInChildren<Arrows>();
         manager = GetComponentInParent<CharactersManager>();
@@ -123,4 +124,13 @@ public class Character : MonoBehaviour
         }
     }
 
+
+    public void SetColor(Color newColor)
+    {
+        color = newColor;
+
+        head.color = color;
+        hat.color = color;
+        body.color = color;
+    }
 }
