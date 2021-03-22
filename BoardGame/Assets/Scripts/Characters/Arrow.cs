@@ -50,7 +50,7 @@ public class Arrow : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Debug.Log("Click Arrow");
+        //Debug.Log("Click Arrow");
         character.MoveTo(direction);
     }
 

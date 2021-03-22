@@ -14,6 +14,9 @@ public class BoardManager : MonoBehaviour
     [SerializeField]
     Sprite squareTile;
 
+    [Range(4, 16)]
+    public int size = 16;
+
 
     [ReorderableList]
     [SerializeField]
@@ -46,13 +49,13 @@ public class BoardManager : MonoBehaviour
     }
 
 
-    public void CreateBoard(int size)
+    public void CreateBoard()
     {
         ClearBoardTiles();
-        CreateSquareBoard(size);
+        CreateSquareBoard();
     }
 
-    void CreateSquareBoard(int size)
+    void CreateSquareBoard()
     {
         for (int i = 0; i < size; i++)
         {
@@ -113,7 +116,10 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-
+    public void SetSize(float s)
+    {
+        size = (int)s;
+    }
 
     Color GetNextColor()
     {

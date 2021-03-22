@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Warrior
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 07386206762d248448e53ffdffb642ca, type: 3}
-  MaxHealth: 60
-  MaxAttack: 40
+  MaxHealth: 80
+  Attack: 40

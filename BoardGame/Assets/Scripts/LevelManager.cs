@@ -18,29 +18,33 @@ public class LevelManager : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField]
-    [Range(4, 16)]
-    int size = 16;
-    [SerializeField]
     [Range(4, 20)]
     int diceSides = 6;
     [Space]
     [SerializeField] int defaulTurnMoves = 3;
     [SerializeField] int defaulTurnDices = 3;
     [SerializeField] int defaulTurnAttack = 1;
+    [SerializeField] [Range(0f,1f)] float battleStateTime = 0.5f;
 
     [Header("Turn")]
-    [SerializeField]
-    Character turnCharacter;
+    [ReadOnly] public Character turnCharacter;
     [SerializeField] [ReadOnly] int turnMoves = 0;
     [SerializeField] [ReadOnly] int turnDices = 0;
     [SerializeField] [ReadOnly] int turnAttack = 0;
     [SerializeField] [ReadOnly] int turnCharacterId = -1;
-    [SerializeField] [ReadOnly] List<int> characterDices;
-    [SerializeField] [ReadOnly] List<int> enemyDices;
+    [ReadOnly] public List<int> characterDices;
+    [ReadOnly] public List<int> enemyDices;
+    [ReadOnly] public List<bool> characterDiceWins;
+    [ReadOnly] public Character attacker;
+    [ReadOnly] public Character attacked;
     [ReadOnly] public Character winner;
+    [SerializeField] [ReadOnly] int maxPickUps = 0;
+    [ReadOnly] public BattleState battleState = BattleState.NONE;
 
+    [Space]
     [SerializeField] UnityEvent onStart;
     [SerializeField] UnityEvent onGameOver;
+
 
     private void OnValidate()
     {
@@ -52,7 +56,7 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
-        StartLevel();
+        //StartLevel();
     }
 
     private void Update()
@@ -61,10 +65,11 @@ public class LevelManager : MonoBehaviour
         {
             EndTurn();
         }
-        else
+
+        if (((float)pickUpsManager.pickUps.Count / maxPickUps) < 0.1f)
         {
-            
-        }        
+            RespawnPickUps();
+        }
     }
 
     [Button]
@@ -77,13 +82,15 @@ public class LevelManager : MonoBehaviour
         SpawnPickUps();
         EndTurn();
 
+        maxPickUps = boardManager.tiles.Count - charactersManager.characters.Count;
+
         onStart.Invoke();
     }
         
     //[Button]
     void CreateBoard()
     {
-        boardManager.CreateBoard(size);
+        boardManager.CreateBoard();
     }
 
     //[Button]
@@ -98,16 +105,25 @@ public class LevelManager : MonoBehaviour
     }
 
     [Button]
-    void ClearLevel()
+    void RespawnPickUps()
+    {
+        pickUpsManager.RespawnPickUps(boardManager.tiles);
+    }
+
+    [Button]
+    public void ClearLevel()
     {
         turnCharacterId = -1;
+        maxPickUps = 0;
+        attacker = null;
+        attacked = null;
         winner = null;
         boardManager.ClearBoardTiles();
         charactersManager.ClearCharacters();
         pickUpsManager.ClearPickUps();
     }
 
-    [Button]
+    //[Button]
     void EndTurn()
     {
         ResetTurn();
@@ -142,6 +158,8 @@ public class LevelManager : MonoBehaviour
         turnCharacter.onAttack.AddListener(StartBattle);
 
         cameraManager.Target = turnCharacter.transform;
+
+        Debug.Log("Turn: " + turnCharacter.name);
     }
 
     Character NextCharacter()
@@ -165,55 +183,8 @@ public class LevelManager : MonoBehaviour
 
     void StartBattle()
     {
-        characterDices.Clear();
-        enemyDices.Clear();
-
-        // Throw Turn Dices
-        for (int i = 0; i < turnDices; i++)
-        {
-            characterDices.Add(Random.Range(0, diceSides) + 1);
-        }
-
-        // Throw Enemy Dices
-        for (int i = 0; i < defaulTurnDices; i++)
-        {
-            enemyDices.Add(Random.Range(0, diceSides) + 1);
-        }
-
-        // Order Dices
-        OrderListBigger(characterDices);
-        OrderListBigger(enemyDices);
-
-
-        // Compare DICES
-        int charDiceWins = 0;
-        int charDiceLoses = 0;
-
-        for (int i = 0; i < Mathf.Min(characterDices.Count, enemyDices.Count); i++)
-        {
-            if (characterDices[i] >= enemyDices[i])
-            {
-                charDiceWins += 1;
-            }
-            else
-            {
-                charDiceLoses += 1;
-            }
-        }
-
-        // Attack the Loser
-        if (charDiceWins > charDiceLoses)
-        {
-            Attack(turnCharacter, turnCharacter.enemy);
-        }
-        else if (charDiceWins < charDiceLoses)
-        {
-            Attack(turnCharacter.enemy, turnCharacter);
-        }
-        else
-        {
-            turnCharacter.state = CharacterSate.Waiting;
-        }
+        Debug.Log("StartBattle");
+        StartCoroutine(Battle());
     }
 
     void Attack(Character attacker, Character attacked)
@@ -226,15 +197,12 @@ public class LevelManager : MonoBehaviour
             winner = attacker;
             GameOver();
         }
-        else
-        {
-            turnCharacter.state = CharacterSate.Waiting;
-        }
     }
 
     void GameOver()
     {
         Debug.Log("GAME OVER - " + winner + " wins.");
+        StopAllCoroutines();
         onGameOver.Invoke();
     }
 
@@ -262,13 +230,89 @@ public class LevelManager : MonoBehaviour
         turnCharacter.canvas.dices.text = turnDices.ToString();
     }
 
-    public void AddTurnAttack(int atk)
-    {
-        turnCharacter.AddAttack(atk);
-    }
 
-    public void AddHealth(int hp = 20)
+    IEnumerator Battle()
     {
-        turnCharacter.AddHealth(hp);
+        battleState = BattleState.NONE;
+        yield return new WaitForSeconds(battleStateTime);
+
+        characterDices.Clear();
+        enemyDices.Clear();
+        characterDiceWins.Clear();
+
+        // Throw Turn Dices
+        for (int i = 0; i < turnDices; i++)
+        {
+            characterDices.Add(Random.Range(0, diceSides) + 1);
+        }
+
+        battleState = BattleState.ThrowingDicesAttacker;
+        yield return new WaitForSeconds(battleStateTime);
+
+        // Throw Enemy Dices
+        for (int i = 0; i < defaulTurnDices; i++)
+        {
+            enemyDices.Add(Random.Range(0, diceSides) + 1);
+        }
+
+        battleState = BattleState.ThrowingDicesAttacked;
+        yield return new WaitForSeconds(battleStateTime);
+
+        // Order Dices
+        OrderListBigger(characterDices);
+        OrderListBigger(enemyDices);
+
+        battleState = BattleState.SortingDices;
+        yield return new WaitForSeconds(battleStateTime);
+
+        // Compare DICES
+        int charDiceWins = 0;
+        int charDiceLoses = 0;
+        characterDiceWins.Clear();
+
+        for (int i = 0; i < Mathf.Min(characterDices.Count, enemyDices.Count); i++)
+        {
+            characterDiceWins.Add(characterDices[i] >= enemyDices[i]);
+
+            if (characterDiceWins[i])
+            {
+                charDiceWins += 1;
+            }
+            else
+            {
+                charDiceLoses += 1;
+            }
+        }
+
+        battleState = BattleState.ComparingDices;
+        yield return new WaitForSeconds(battleStateTime);
+
+        // Attack the Loser
+        if (charDiceWins > charDiceLoses)
+        {
+            attacker = turnCharacter;
+            attacked = turnCharacter.enemy;
+        }
+        else if (charDiceWins < charDiceLoses)
+        {
+            attacker = turnCharacter.enemy;
+            attacked = turnCharacter;
+        }
+
+        battleState = BattleState.ShowingWinner;
+        yield return new WaitForSeconds(battleStateTime);
+
+        if (attacker != null && attacked != null) 
+        {
+            Attack(attacker, attacked);
+        }        
+
+        battleState = BattleState.NONE;
+        yield return new WaitForSeconds(battleStateTime);
+
+        turnCharacter.state = CharacterSate.Waiting;
+
+        attacker = null;
+        attacked = null;
     }
 }

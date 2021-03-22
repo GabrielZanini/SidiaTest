@@ -47,7 +47,12 @@ public class PickUpsManager : MonoBehaviour
     public void SpawnPickUps(List<Tile> tiles)
     {
         ClearPickUps();
+        RespawnPickUps(tiles);
+    }
 
+    //[Button]
+    public void RespawnPickUps(List<Tile> tiles)
+    {
         for (int i = 0; i < tiles.Count; i++)
         {
             if (tiles[i].content == TileContentType.Empty)
@@ -62,8 +67,8 @@ public class PickUpsManager : MonoBehaviour
 
     void SetPickUp(PickUp pickUp, Tile tile)
     {
-        var tier = GetTier();
-        var data = GetData();
+        PickUpTier tier = GetTier();
+        PickUpData data = GetData();
 
         pickUp.type = data.type;
         pickUp.value = data.value * tier.multiplier;
@@ -73,22 +78,24 @@ public class PickUpsManager : MonoBehaviour
         pickUp.tile = tile;
         tile.content = TileContentType.Collectable;
         tile.pickUp = pickUp;
+
+        pickUp.manager = this;
     }
 
     [Button]
     public void ClearPickUps()
     {
-        for (int i = 0; i < pickUps.Count; i++)
+        while (pickUps.Count > 0)
         {
-            pickUps[i].RemoveFromTile();
+            PickUp pickUp = pickUps[0].RemoveFromTileAndList();
             
             if (Application.isPlaying)
             {
-                Destroy(pickUps[i].gameObject);
+                Destroy(pickUp.gameObject);
             }
             else
             {
-                DestroyImmediate(pickUps[i].gameObject);
+                DestroyImmediate(pickUp.gameObject);
             }
         }
 

@@ -7,11 +7,11 @@ using UnityEngine.Events;
 public class Character : MonoBehaviour
 {
     [Header("Settings")]
+    [ReadOnly] public string charName;
     public bool isLocked = false;
     public CharacterType type = CharacterType.Player;
 
-    [SerializeField]
-    Color color = Color.white;
+    public Color color = Color.white;
 
     [Expandable]
     public CharacterSettings settings;    
@@ -51,12 +51,16 @@ public class Character : MonoBehaviour
     [Foldout("Events")]
     public UnityEvent onAttack;
     [Foldout("Events")]
+    public UnityEvent onPickUp;
+    [Foldout("Events")]
     public UnityEvent onDeath;
 
     Arrows arrows;
 
     [HideInInspector]
     public CharacterCanvas canvas;
+    [HideInInspector]
+    public LevelManager level;
 
     public int Attack { get { return settings.Attack; } }
     public bool IsDead { get { return health <= 0; } }
@@ -86,30 +90,37 @@ public class Character : MonoBehaviour
         
     }
 
-    [Button]
+    //[Button]
     void Update()
     {
         if (isTurn && !isLocked)
         {
             if (state == CharacterSate.Moving)
             {
-                Move();
-                arrows.HideArrows();
-                hasMoved = true;
-
-                if (currentTile.transform.position == transform.position)
-                {
+                if (currentTile.transform.position != transform.position)
+                {                    
+                    Move();
+                    arrows.HideArrows();
+                    hasMoved = true;
+                }
+                else
+                {                    
+                    CollectPickUp();
                     WaitIfNotAttack();
                 }
             }
             else if (state == CharacterSate.Waiting)
             {
+                WaitIfNotAttack();
+
                 if (type == CharacterType.Player)
                 {
                     arrows.ShowArrows(currentTile);
                 }
-
-                WaitIfNotAttack();
+                else if (type == CharacterType.IA)
+                {
+                    MoveTo((DirectionType)Random.Range(0,4));
+                }
             }
             else if (state == CharacterSate.Fighting)
             {
@@ -179,18 +190,49 @@ public class Character : MonoBehaviour
         return null;
     }
 
+    void CollectPickUp()
+    {
+        if (currentTile.content == TileContentType.Collectable)
+        {
+            PickUp pickUp = currentTile.pickUp.RemoveFromTileAndList();
+
+            Debug.Log(gameObject.name +  " Picked: " + pickUp.type.ToString());
+            
+            if (pickUp.type == PickUpType.Attack)
+            {
+                AddAttack(pickUp.value);
+            }
+            else if (pickUp.type == PickUpType.Dice)
+            {
+                level.AddTurnDice(pickUp.value);
+            }
+            else if (pickUp.type == PickUpType.Health)
+            {
+                AddHealth(pickUp.value);
+            }
+            else if (pickUp.type == PickUpType.Move)
+            {
+                level.AddTurnMove(pickUp.value);
+            }
+
+            Destroy(pickUp.gameObject);
+
+            onPickUp.Invoke(); 
+        }
+
+        currentTile.content = TileContentType.Character;
+        currentTile.character = this;
+    }
 
     public void MoveTo(DirectionType direction)
     {        
         for (int i=0; i<currentTile.Neighbors.Count; i++)
         {
-            if (currentTile.Neighbors[i].direction == direction)
+            if (currentTile.Neighbors[i].direction == direction && currentTile.Neighbors[i].tile.content != TileContentType.Character)
             {
                 currentTile.content = TileContentType.Empty;
                 currentTile.character = null;
                 currentTile = currentTile.Neighbors[i].tile;
-                currentTile.content = TileContentType.Character;
-                currentTile.character = this;
                 state = CharacterSate.Moving;
                 onMove.Invoke();
                 break;

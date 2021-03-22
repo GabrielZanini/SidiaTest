@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 8a5a51848d1821646bfb059a73b3f0e6, type: 3}
   MaxHealth: 100
-  MaxAttack: 20
+  Attack: 30

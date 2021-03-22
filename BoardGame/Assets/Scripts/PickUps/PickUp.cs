@@ -14,6 +14,9 @@ public class PickUp : MonoBehaviour
     [ReadOnly]
     public Tile tile;
 
+    [HideInInspector]
+    public PickUpsManager manager;
+
     private void OnValidate()
     {
         spriterRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -24,7 +27,7 @@ public class PickUp : MonoBehaviour
         OnValidate();
     }
 
-    public void RemoveFromTile()
+    public PickUp RemoveFromTileAndList()
     {
         tile.pickUp = null;
 
@@ -32,5 +35,12 @@ public class PickUp : MonoBehaviour
         {
             tile.content = TileContentType.Empty;
         }
+
+        if (manager.pickUps.Contains(this))
+        {
+            manager.pickUps.Remove(this);
+        }       
+
+        return this;
     }
 }

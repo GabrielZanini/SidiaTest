@@ -28,12 +28,12 @@ public enum TurnActions
     Attack
 }
 
-public enum DirectionType
+public enum DirectionType : int
 {
-    Up,
-    Down,
-    Left,
-    Right
+    Up = 0,
+    Down = 1,
+    Left = 2,
+    Right = 3,
 }
 
 public enum PickUpType
@@ -58,4 +58,14 @@ public enum TileContentType
     Empty,
     Collectable,
     Character,
+}
+
+public enum BattleState
+{
+    NONE,
+    ThrowingDicesAttacker,
+    ThrowingDicesAttacked,
+    SortingDices,
+    ComparingDices,
+    ShowingWinner,
 }

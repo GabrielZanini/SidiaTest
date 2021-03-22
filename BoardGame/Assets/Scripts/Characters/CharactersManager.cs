@@ -8,14 +8,24 @@ public class CharactersManager : MonoBehaviour
 {
     [SerializeField] GameObject characterPrefab;    
     [SerializeField] Transform holder;
-    [SerializeField]
     [ReorderableList]
-    List<CharacterData> charactersData;
+    public List<CharacterData> charactersData;
 
 
     [ReadOnly]
     public List<Character> characters;
 
+    LevelManager level;
+
+    private void OnValidate()
+    {
+        level = GetComponentInParent<LevelManager>();
+    }
+
+    private void Awake()
+    {
+        OnValidate();
+    }
 
     public void SpawnCharacters(List<Tile> spawnPoints)
     {
@@ -39,22 +49,28 @@ public class CharactersManager : MonoBehaviour
         character.SetSettings(data.settings);
         character.currentTile = spawnPoint;
         spawnPoint.content = TileContentType.Character;
+        spawnPoint.character = character;
 
         CharacterCanvas canvas = character.GetComponentInChildren<CharacterCanvas>();
         canvas.label.color = data.labelColor;
-        canvas.label.text = (index + 1).ToString();
-        
+
         if (character.type == CharacterType.Player) 
         {
-            character.gameObject.name += " Player";
-            canvas.label.text += "P";
+            character.gameObject.name += "Player";
+            character.charName = "P";
 
         }
         else if (character.type == CharacterType.IA)
         {
-            character.gameObject.name += " IA";
-            canvas.label.text = "CPU";
-        }        
+            character.gameObject.name += "IA";
+            character.charName = "CPU";
+        }
+
+        character.gameObject.name += (index + 1).ToString();
+        character.charName += (index + 1).ToString();
+
+        canvas.label.text = character.charName;
+        character.level = level;
     }
 
     [Button]
