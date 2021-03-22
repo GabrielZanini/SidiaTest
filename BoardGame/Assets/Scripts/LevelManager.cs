@@ -40,7 +40,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] [ReadOnly] int turnCharacterId = -1;
     [SerializeField] [ReadOnly] List<int> characterDices;
     [SerializeField] [ReadOnly] List<int> enemyDices;
+    [ReadOnly] public Character winner;
 
+    [SerializeField] UnityEvent onStart;
     [SerializeField] UnityEvent onGameOver;
 
     private void OnValidate()
@@ -53,7 +55,7 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
-        CreateLevel();
+        StartLevel();
     }
 
     private void Update()
@@ -69,14 +71,15 @@ public class LevelManager : MonoBehaviour
     }
 
     [Button]
-    void CreateLevel()
+    public void StartLevel()
     {
         ClearLevel();
 
         CreateBoard();
         SpawnCharacters();
-
         EndTurn();
+
+        onStart.Invoke();
     }
         
     //[Button]
@@ -95,6 +98,7 @@ public class LevelManager : MonoBehaviour
     void ClearLevel()
     {
         turnCharacterId = -1;
+        winner = null;
         boardManager.ClearBoardTiles();
         charactersManager.ClearCharacters();
     }
@@ -120,14 +124,16 @@ public class LevelManager : MonoBehaviour
         if (turnCharacter != null)
         {
             turnCharacter.isTurn = false;
-            turnCharacter.canAttack = false;
+            turnCharacter.canvas.steps.text = "0";
+            turnCharacter.canvas.dices.text = "0";
             turnCharacter.onMove.RemoveListener(RemoveTurnMove);
             turnCharacter.onAttack.RemoveListener(StartBattle);
         }
         
         turnCharacter = character;
         turnCharacter.isTurn = true;
-        turnCharacter.canAttack = true;
+        turnCharacter.canvas.steps.text = turnMoves.ToString();
+        turnCharacter.canvas.dices.text = turnDices.ToString();
         turnCharacter.onMove.AddListener(RemoveTurnMove);
         turnCharacter.onAttack.AddListener(StartBattle);
 
@@ -150,6 +156,7 @@ public class LevelManager : MonoBehaviour
     void RemoveTurnMove()
     {
         turnMoves -= 1;
+        turnCharacter.canvas.steps.text = turnMoves.ToString();
     }
 
     void StartBattle()
@@ -212,7 +219,8 @@ public class LevelManager : MonoBehaviour
         
         if (attacked.IsDead)
         {
-            GameOver(attacker);
+            winner = attacker;
+            GameOver();
         }
         else
         {
@@ -220,9 +228,9 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    void GameOver(Character winer)
+    void GameOver()
     {
-        Debug.Log("GAME OVER - " + winer + " wins.");
+        Debug.Log("GAME OVER - " + winner + " wins.");
         onGameOver.Invoke();
     }
 
@@ -238,23 +246,25 @@ public class LevelManager : MonoBehaviour
 
     // PickUps
 
-    public void AddTurnMove()
+    public void AddTurnMove(int mv = 1)
     {
-        turnMoves += 1;
+        turnMoves += mv;
+        turnCharacter.canvas.steps.text = turnMoves.ToString();
     }
 
-    public void AddTurnDice()
+    public void AddTurnDice(int dices)
     {
-        turnDices += 1;
+        turnDices += dices;
+        turnCharacter.canvas.dices.text = turnDices.ToString();
     }
 
-    public void AddTurnAttack()
+    public void AddTurnAttack(int atk)
     {
-        turnAttack += 1;
+        turnCharacter.AddAttack(atk);
     }
 
-    public void AddHealth()
+    public void AddHealth(int hp = 20)
     {
-        turnCharacter.AddHealth(20);
+        turnCharacter.AddHealth(hp);
     }
 }

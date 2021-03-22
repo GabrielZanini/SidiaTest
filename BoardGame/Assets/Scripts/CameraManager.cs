@@ -9,7 +9,7 @@ public class CameraManager : MonoBehaviour
     [SerializeField] Transform holder;
     [SerializeField] Vector3 positionOffset = Vector3.zero;
     [Range(0f, 10f)]
-    [SerializeField] 
+    [SerializeField]
     float smoothPosition = 1f;
 
     Camera cam;
@@ -28,8 +28,7 @@ public class CameraManager : MonoBehaviour
 
         cam = holder.GetComponentInChildren<Camera>();
         
-        cam.transform.localPosition = positionOffset;
-        
+        cam.transform.localPosition = positionOffset;        
     }
 
     void Update()

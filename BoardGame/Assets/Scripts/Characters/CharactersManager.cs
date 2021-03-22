@@ -37,20 +37,20 @@ public class CharactersManager : MonoBehaviour
         character.currentTile = spawnPoint;
         spawnPoint.content = TileContentType.Character;
 
-        Text label = character.GetComponentInChildren<Text>();
-        label.color = data.labelColor;
-        label.text = (index + 1).ToString();
+        CharacterCanvas canvas = character.GetComponentInChildren<CharacterCanvas>();
+        canvas.label.color = data.labelColor;
+        canvas.label.text = (index + 1).ToString();
         
         if (character.type == CharacterType.Player) 
         {
             character.gameObject.name += " Player";
-            label.text += "P";
+            canvas.label.text += "P";
 
         }
         else if (character.type == CharacterType.IA)
         {
             character.gameObject.name += " IA";
-            label.text = "CPU";
+            canvas.label.text = "CPU";
         }        
     }
 

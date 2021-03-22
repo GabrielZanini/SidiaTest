@@ -13,20 +13,17 @@ public class Character : MonoBehaviour
     [SerializeField]
     Color color = Color.white;
 
-    [SerializeField]
     [Expandable]
-    CharacterSettings settings;    
+    public CharacterSettings settings;    
     
     public Tile currentTile;
     [SerializeField]
     float moveSpeed;
 
-    [SerializeField]
     [ReadOnly]
-    int health = 0;
-    [SerializeField]
+    public int health = 0;
     [ReadOnly]
-    int attack = 0;
+    public int attack = 0;
 
     [Header("Turn")]
     [SerializeField]
@@ -34,8 +31,8 @@ public class Character : MonoBehaviour
     public CharacterSate state = CharacterSate.Waiting;
     [ReadOnly]
     public bool isTurn = false;
-    [ReadOnly]
-    public bool canAttack = false;
+    //[ReadOnly]
+    //public bool canAttack = false;
     [ReadOnly]
     [SerializeField] bool hasMoved = false;
     [ReadOnly]
@@ -57,8 +54,9 @@ public class Character : MonoBehaviour
     public UnityEvent onDeath;
 
     Arrows arrows;
-    CharactersManager manager;
 
+    [HideInInspector]
+    public CharacterCanvas canvas;
 
     public int Attack { get { return settings.Attack; } }
     public bool IsDead { get { return health <= 0; } }
@@ -67,7 +65,7 @@ public class Character : MonoBehaviour
     private void Reset()
     {
         arrows = GetComponentInChildren<Arrows>();
-        manager = GetComponentInParent<CharactersManager>();
+        canvas = GetComponentInChildren<CharacterCanvas>();
 
         SetSettings(settings);
         SetColor(color);
@@ -133,14 +131,14 @@ public class Character : MonoBehaviour
     {
         state = CharacterSate.Waiting;
 
-        if (canAttack && hasMoved)
+        if (hasMoved)
         {
             enemy = EnemyNear();
 
             if (enemy != null)
             {
                 state = CharacterSate.Fighting;
-                canAttack = false;
+                hasMoved = false;
                 onAttack.Invoke();
             }
         }
@@ -167,10 +165,6 @@ public class Character : MonoBehaviour
         }
     }
 
-    void CanAttack()
-    {
-        
-    }
 
     Character EnemyNear()
     {
@@ -225,7 +219,6 @@ public class Character : MonoBehaviour
     {
         AddHealth(-damage);
     }
-
 
     public void AddAttack(int atk)
     {
