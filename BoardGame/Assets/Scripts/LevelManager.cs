@@ -23,9 +23,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField]
     [Range(4, 20)]
     int diceSides = 6;
-    [SerializeField]
-    [ReorderableList]
-    List<CharacterData> charactersData;
     [Space]
     [SerializeField] int defaulTurnMoves = 3;
     [SerializeField] int defaulTurnDices = 3;
@@ -77,6 +74,7 @@ public class LevelManager : MonoBehaviour
 
         CreateBoard();
         SpawnCharacters();
+        SpawnPickUps();
         EndTurn();
 
         onStart.Invoke();
@@ -91,7 +89,12 @@ public class LevelManager : MonoBehaviour
     //[Button]
     void SpawnCharacters()
     {
-        charactersManager.SpawnCharacters(charactersData, boardManager.spawnPoints);
+        charactersManager.SpawnCharacters(boardManager.spawnPoints);
+    }
+
+    void SpawnPickUps()
+    {
+        pickUpsManager.SpawnPickUps(boardManager.tiles);
     }
 
     [Button]
@@ -101,6 +104,7 @@ public class LevelManager : MonoBehaviour
         winner = null;
         boardManager.ClearBoardTiles();
         charactersManager.ClearCharacters();
+        pickUpsManager.ClearPickUps();
     }
 
     [Button]

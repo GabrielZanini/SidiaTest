@@ -13,8 +13,10 @@ public class Tile : MonoBehaviour
     [Space]
     public TileContentType content = TileContentType.Empty;
 
-    [ShowNativeProperty]
-    public Character Character { get; set; }
+    [ReadOnly]
+    public Character character;
+    [ReadOnly]
+    public PickUp pickUp;
 
     [SerializeField]
     public List<Neighbor> Neighbors;

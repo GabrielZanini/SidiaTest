@@ -172,7 +172,7 @@ public class Character : MonoBehaviour
         {
             if (currentTile.Neighbors[i].tile.content == TileContentType.Character)
             {
-                return currentTile.Neighbors[i].tile.Character;
+                return currentTile.Neighbors[i].tile.character;
             }
         }
 
@@ -187,10 +187,10 @@ public class Character : MonoBehaviour
             if (currentTile.Neighbors[i].direction == direction)
             {
                 currentTile.content = TileContentType.Empty;
-                currentTile.Character = null;
+                currentTile.character = null;
                 currentTile = currentTile.Neighbors[i].tile;
                 currentTile.content = TileContentType.Character;
-                currentTile.Character = this;
+                currentTile.character = this;
                 state = CharacterSate.Moving;
                 onMove.Invoke();
                 break;

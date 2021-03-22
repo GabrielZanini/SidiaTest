@@ -8,21 +8,24 @@ public class CharactersManager : MonoBehaviour
 {
     [SerializeField] GameObject characterPrefab;    
     [SerializeField] Transform holder;
- 
-    
+    [SerializeField]
+    [ReorderableList]
+    List<CharacterData> charactersData;
+
+
     [ReadOnly]
     public List<Character> characters;
 
 
-    public void SpawnCharacters(List<CharacterData> data, List<Tile> spawnPoints)
+    public void SpawnCharacters(List<Tile> spawnPoints)
     {
         ClearCharacters();
 
-        for (int i = 0; i < Mathf.Min(data.Count, spawnPoints.Count); i++)
+        for (int i = 0; i < Mathf.Min(charactersData.Count, spawnPoints.Count); i++)
         {
             GameObject obj = Instantiate(characterPrefab, spawnPoints[i].transform.position, Quaternion.identity, holder);
             Character character = obj.GetComponent<Character>();
-            SetCharacter(i, character, data[i], spawnPoints[i]);
+            SetCharacter(i, character, charactersData[i], spawnPoints[i]);
             characters.Add(character);
         }
     }
@@ -76,13 +79,16 @@ public class CharactersManager : MonoBehaviour
     {
         for (int i = 0; i < characters.Count; i++)
         {
-            characters[i].isLocked = false;
+            characters[i].isLocked = true;
         }
     }
 
     public void UnlockCharacters()
     {
-        
+        for (int i = 0; i < characters.Count; i++)
+        {
+            characters[i].isLocked = false;
+        }
     }
 
 }

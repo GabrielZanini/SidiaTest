@@ -9,6 +9,9 @@ public class BoardManager : MonoBehaviour
     GameObject tilePrefab;
 
     [SerializeField]
+    Transform holder;
+
+    [SerializeField]
     Sprite squareTile;
 
 
@@ -16,11 +19,11 @@ public class BoardManager : MonoBehaviour
     [SerializeField]
     List<Color> tileColors;
 
-    [SerializeField]
-    Board board;
-
     [ReorderableList]
     public List<Tile> spawnPoints;
+
+    [ReadOnly]
+    public List<Tile> tiles;
 
     int nextColorId = -1;
 
@@ -55,7 +58,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int j = 0; j < size; j++)
             {
-                GameObject obj = Instantiate(tilePrefab, new Vector3(j, 0, i), Quaternion.Euler(90, 0, 0), board.transform);
+                GameObject obj = Instantiate(tilePrefab, new Vector3(j, 0, i), Quaternion.Euler(90, 0, 0), holder);
                 obj.name = "Tile " + j + "x" + i;
                 Tile tile = obj.GetComponent<Tile>();
 
@@ -65,18 +68,18 @@ public class BoardManager : MonoBehaviour
                 // Vertical Neighbors
                 if (i > 0)
                 {
-                    tile.Neighbors.Add(new Neighbor(DirectionType.Down, board.tiles[(i - 1) * size + j]));
-                    board.tiles[(i - 1) * size + j].Neighbors.Add(new Neighbor(DirectionType.Up, tile));
+                    tile.Neighbors.Add(new Neighbor(DirectionType.Down, tiles[(i - 1) * size + j]));
+                    tiles[(i - 1) * size + j].Neighbors.Add(new Neighbor(DirectionType.Up, tile));
                 }
 
                 // Horizontal Neighbors
                 if (j > 0)
                 {
-                    tile.Neighbors.Add(new Neighbor(DirectionType.Left, board.tiles[i * size + j - 1]));
-                    board.tiles[i * size + j - 1].Neighbors.Add(new Neighbor(DirectionType.Right, tile));
+                    tile.Neighbors.Add(new Neighbor(DirectionType.Left, tiles[i * size + j - 1]));
+                    tiles[i * size + j - 1].Neighbors.Add(new Neighbor(DirectionType.Right, tile));
                 }
 
-                board.tiles.Add(tile);
+                tiles.Add(tile);
             }
 
             if (size % 2 == 0)
@@ -85,8 +88,8 @@ public class BoardManager : MonoBehaviour
             }            
         }
 
-        spawnPoints.Add(board.First);
-        spawnPoints.Add(board.Last);
+        spawnPoints.Add(tiles[0]);
+        spawnPoints.Add(tiles[tiles.Count - 1]);
     }
 
     [Button]
@@ -95,18 +98,18 @@ public class BoardManager : MonoBehaviour
         nextColorId = -1;
         spawnPoints.Clear();
 
-        while (board.tiles.Count > 0)
+        while (tiles.Count > 0)
         {
             if (Application.isPlaying)
             {
-                Destroy(board.First.gameObject);
+                Destroy(tiles[0].gameObject);
             }
             else
             {
-                DestroyImmediate(board.First.gameObject);
+                DestroyImmediate(tiles[0].gameObject);
             }
             
-            board.tiles.Remove(board.First);
+            tiles.Remove(tiles[0]);
         }
     }
 
